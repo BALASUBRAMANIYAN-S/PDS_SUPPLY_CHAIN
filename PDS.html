@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP32 Project - Live Data & Location</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    nav {
+      background-color: #333;
+      padding: 10px;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 20px 0 10px;
+    }
+
+    .section {
+      padding: 20px;
+    }
+
+    iframe {
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .sheet-frame {
+      height: 500px;
+    }
+
+    .map-frame {
+      height: 400px;
+    }
+
+    #loader {
+      text-align: center;
+      font-weight: bold;
+      padding: 20px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #eee;
+      margin-top: 40px;
+    }
+
+    .dark-mode {
+      background-color: #121212;
+      color: #f0f0f0;
+    }
+
+    .dark-mode iframe {
+      border-color: #444;
+    }
+
+    @media (max-width: 600px) {
+      .sheet-frame, .map-frame {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="#sheet">Live Data</a>
+    <a href="#map">Location</a>
+    <button onclick="toggleDarkMode()" style="margin-left: 20px; padding: 5px 10px;">🌙 Toggle Dark Mode</button>
+  </nav>
+
+  <div id="loader">Loading Google Sheet...</div>
+
+  <div class="section" id="sheet">
+    <h2>📄 Live Data from Google Sheet To connect PDS System</h2>
+    <iframe class="sheet-frame" id="sheetFrame"
+      src="https://docs.google.com/spreadsheets/d/137U9BSuYKUFmBDNRlARlSCnfddsF99nNJV91tc2RCAo/edit?usp=sharing"
+      onload="document.getElementById('loader').style.display='none'"></iframe>
+  </div>
+
+  <div class="section" id="map">
+    <h2>📍 GPS Location View</h2>
+    <iframe class="map-frame"
+      src="https://www.google.com/maps?q=10.5929,78.7639&z=14&output=embed"
+      allowfullscreen>
+    </iframe>
+  </div>
+
+  <footer>
+    © 2025 Built By BALA | Dveloper Boy ECE 💻
+  </footer>
+
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+
+    // Auto-refresh Google Sheet iframe every 15 seconds
+    setInterval(() => {
+      const sheet = document.getElementById("sheetFrame");
+      sheet.src = sheet.src;
+    }, 15000);
+  </script>
+</body>
+</html>
