@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ESP32 Project - Live Data & Location</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Container Dashboard + Live Data</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
       padding: 0;
-      background-color: #f4f4f4;
+      margin: 0;
+      text-align: center;
       color: #333;
       transition: background-color 0.3s, color 0.3s;
     }
@@ -17,29 +18,58 @@
     nav {
       background-color: #333;
       padding: 10px;
-      text-align: center;
     }
 
-    nav a {
+    nav a, nav button {
       color: white;
-      margin: 0 15px;
+      margin: 0 10px;
       text-decoration: none;
       font-weight: bold;
+      border: none;
+      background: none;
+      cursor: pointer;
     }
 
-    h2 {
-      text-align: center;
+    h1, h2 {
       margin: 20px 0 10px;
     }
 
-    .section {
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
       padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      width: 280px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      font-size: 18px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    strong {
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .yes {
+      color: green;
+    }
+
+    .no {
+      color: red;
     }
 
     iframe {
       width: 100%;
       border: 1px solid #ccc;
       border-radius: 8px;
+      margin: 20px 0;
     }
 
     .sheet-frame {
@@ -51,7 +81,6 @@
     }
 
     #loader {
-      text-align: center;
       font-weight: bold;
       padding: 20px;
     }
@@ -68,11 +97,20 @@
       color: #f0f0f0;
     }
 
+    .dark-mode .card {
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+    }
+
     .dark-mode iframe {
       border-color: #444;
     }
 
     @media (max-width: 600px) {
+      .card {
+        width: 90%;
+      }
+
       .sheet-frame, .map-frame {
         height: 300px;
       }
@@ -80,43 +118,97 @@
   </style>
 </head>
 <body>
+
   <nav>
-    <a href="#sheet">Live Data</a>
-    <a href="#map">Location</a>
-    <button onclick="toggleDarkMode()" style="margin-left: 20px; padding: 5px 10px;">🌙 Toggle Dark Mode</button>
+    <a href="#dashboard">📦 Dashboard</a>
+    <a href="#sheet">📄 Live Data</a>
+    <a href="#map">📍 Location</a>
+    <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
   </nav>
 
-  <div id="loader">Loading Google Sheet...</div>
+  <section id="dashboard">
+    <h1>📦 Smart Container Dashboard</h1>
+    <div class="card-container">
+      <div class="card">⚖️ Weight: <strong id="weightValue">Fetching...</strong></div>
+      <div class="card">📍 Motion: <strong id="motionValue">Fetching...</strong></div>
+      <div class="card">⬇️ Underload: <strong id="underLoad">Fetching...</strong></div>
+      <div class="card">⬆️ Overload: <strong id="overLoad">Fetching...</strong></div>
+    </div>
+  </section>
 
-  <div class="section" id="sheet">
-    <h2>📄 Live Data from Google Sheet To connect PDS System</h2>
+  <section class="section" id="sheet">
+    <h2>📄 Live Data from Google Sheet - PDS System</h2>
+    <div id="loader">Loading Google Sheet...</div>
     <iframe class="sheet-frame" id="sheetFrame"
       src="https://docs.google.com/spreadsheets/d/137U9BSuYKUFmBDNRlARlSCnfddsF99nNJV91tc2RCAo/edit?usp=sharing"
-      onload="document.getElementById('loader').style.display='none'"></iframe>
-  </div>
+      onload="document.getElementById('loader').style.display='none'">
+    </iframe>
+  </section>
 
-  <div class="section" id="map">
+  <section class="section" id="map">
     <h2>📍 GPS Location View</h2>
     <iframe class="map-frame"
-       src="https://www.google.com/maps?q=10.591956047972563,78.76530872359565&z=14&output=embed"
+      src="https://www.google.com/maps?q=10.591956047972563,78.76530872359565&z=14&output=embed"
       allowfullscreen>
     </iframe>
-  </div>
+  </section>
 
   <footer>
-    © 2025 Built By BALA | Dveloper Boy ECE 💻
+    © 2025 Built By BALA | Developer Boy ECE 💻
   </footer>
 
   <script>
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark-mode");
+    const token = "Ep4LSpsPSVyEwSwb6BxINanTs9dYtc_n";
+
+    function updateValue(id, value, suffix = '', boolStyle = false) {
+      const el = document.getElementById(id);
+      if (boolStyle) {
+        el.textContent = value === "1" ? "YES" : "NO";
+        el.className = value === "1" ? "yes" : "no";
+      } else {
+        el.textContent = `${value}${suffix}`;
+      }
     }
 
-    // Auto-refresh Google Sheet iframe every 15 seconds
+    function fetchBlynkData() {
+      fetch(`https://blynk.cloud/external/api/get?token=${token}&V1`)
+        .then(res => res.text())
+        .then(data => updateValue("weightValue", data, " kg"))
+        .catch(err => console.error("Weight error:", err));
+
+      fetch(`https://blynk.cloud/external/api/get?token=${token}&V0`)
+        .then(res => res.text())
+        .then(data => {
+          const el = document.getElementById("motionValue");
+          el.textContent = data === "1" ? "Motion Detected" : "No Motion";
+          el.className = data === "1" ? "yes" : "no";
+        })
+        .catch(err => console.error("Motion error:", err));
+
+      fetch(`https://blynk.cloud/external/api/get?token=${token}&V3`)
+        .then(res => res.text())
+        .then(data => updateValue("underLoad", data, "", true))
+        .catch(err => console.error("Underload error:", err));
+
+      fetch(`https://blynk.cloud/external/api/get?token=${token}&V5`)
+        .then(res => res.text())
+        .then(data => updateValue("overLoad", data, "", true))
+        .catch(err => console.error("Overload error:", err));
+    }
+
+    // Initial fetch + interval
+    fetchBlynkData();
+    setInterval(fetchBlynkData, 5000);
+
+    // Auto-refresh Sheet
     setInterval(() => {
       const sheet = document.getElementById("sheetFrame");
       sheet.src = sheet.src;
     }, 15000);
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
   </script>
 </body>
 </html>
