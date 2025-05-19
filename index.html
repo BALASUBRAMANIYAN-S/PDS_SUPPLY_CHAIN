@@ -130,7 +130,6 @@
     <h1>📦 Smart Container Dashboard</h1>
     <div class="card-container">
       <div class="card">⚖️ Weight: <strong id="weightValue">Fetching...</strong></div>
-      <div class="card">📏 Distance: <strong id="motionValue">Fetching...</strong></div>
       <div class="card">⬇️ Underload: <strong id="underLoad">Fetching...</strong></div>
       <div class="card">⬆️ Overload: <strong id="overLoad">Fetching...</strong></div>
     </div>
@@ -173,14 +172,8 @@
     function fetchBlynkData() {
       fetch(`https://blynk.cloud/external/api/get?token=${token}&V1`)
         .then(res => res.text())
-        .then(data => updateValue("weightValue", data, " kg"))
+        .then(data => updateValue("weightValue", data, " g"))
         .catch(err => console.error("Weight error:", err));
-
-      fetch(`https://blynk.cloud/external/api/get?token=${token}&V0`)
-  .then(res => res.text())
-  .then(data => updateValue("motionValue", data, " cm"))
-  .catch(err => console.error("Ultrasonic error:", err));
-
 
       fetch(`https://blynk.cloud/external/api/get?token=${token}&V3`)
         .then(res => res.text())
